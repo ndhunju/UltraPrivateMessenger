@@ -27,6 +27,7 @@ kotlin {
         commonMain.dependencies {
             // Put your multiplatform dependencies here
             implementation(libs.kotlin.dateTime)
+            implementation(libs.kotlin.coroutines)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
