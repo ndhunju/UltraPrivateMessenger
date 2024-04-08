@@ -5,9 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,14 +22,8 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -45,7 +37,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -55,7 +46,7 @@ import com.ndhunju.ultraprivatemessenger.android.R
 import com.ndhunju.ultraprivatemessenger.android.ui.common.CenteredMessageWithButton
 import com.ndhunju.ultraprivatemessenger.android.ui.common.NavAppBar
 import com.ndhunju.ultraprivatemessenger.android.ui.common.ScrollToTopLaunchedEffect
-import com.ndhunju.ultraprivatemessenger.common.NavItem
+import com.ndhunju.ultraprivatemessenger.android.ui.navigation.AppNavigationDrawer
 import com.ndhunju.ultraprivatemessenger.data.sampleMessages
 import com.ndhunju.ultraprivatemessenger.ui.threads.Message
 import com.ndhunju.ultraprivatemessenger.ui.threads.ThreadsViewModel
@@ -73,104 +64,43 @@ fun ThreadScreenPreview() {
 }
 
 @Composable
-fun AppNavigationDrawer(viewModel: ThreadsViewModel?) {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+fun ThreadListContentWithNavDrawer(
+    viewModel: ThreadsViewModel? = null
+) {
     val coroutineScope = rememberCoroutineScope()
-
     var onClickLauncherIconCount = remember { 0 }
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-    ModalNavigationDrawer(
+    AppNavigationDrawer(
         drawerState = drawerState,
-        drawerContent = {
-            NavigationDrawerItems(
-                navigationItems = navigationItems,
-                onClickNavItem = {
-                    viewModel?.onClickNavItem?.invoke(it)
-                    coroutineScope.launch { drawerState.close() }
-                },
-                onClickLauncherIcon = {
-                    onClickLauncherIconCount++
-                    if (onClickLauncherIconCount > 3) {
-                        onClickLauncherIconCount = 0
-                        viewModel?.doOpenDebugScreen?.invoke()
-                        coroutineScope.launch { drawerState.close() }
-                    }
-                }
-            )
-
+        onClickNavItem = viewModel?.onClickNavItem,
+        onClickLauncherIcon = {
+            onClickLauncherIconCount++
+            if (onClickLauncherIconCount > 3) {
+                onClickLauncherIconCount = 0
+                viewModel?.doOpenDebugScreen?.invoke()
+                coroutineScope.launch { drawerState.close() }
+            }
         }
     ) {
         ThreadListContent(
-            viewModel = viewModel,
-            onClickMenuOrUpIcon = { coroutineScope.launch { drawerState.open() } }
+            viewModel?.title?.collectAsState(""),
+            viewModel?.isRefresh?.collectAsState(),
+            viewModel?.showProgress?.collectAsState(),
+            viewModel?.showUpIcon?.collectAsState(false),
+            viewModel?.showSearchTextField?.collectAsState(),
+            viewModel?.showErrorMessageForPermissionDenied?.collectAsState(),
+            viewModel?.lastMessageForEachThread?.collectAsState(),
+            viewModel?.onRefreshByUser,
+            viewModel?.onClickSearchIcon,
+            viewModel?.onSearchTextChanged,
+            viewModel?.onClickGrantPermission,
+            viewModel?.onClickThreadMessage,
+            onClickMenuOrUpIcon = {
+                coroutineScope.launch {drawerState.open() }
+            }
         )
     }
-}
-
-@Composable
-fun NavigationDrawerItems(
-    navigationItems: List<NavItemAndroid>,
-    onClickNavItem: (NavItem) -> Unit,
-    onClickLauncherIcon: () -> Unit,
-) {
-    ModalDrawerSheet {
-        // Show big app icon
-        Icon(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
-            contentDescription = null,
-            modifier = Modifier
-                .size(112.dp)
-                .align(Alignment.CenterHorizontally)
-                .clickable { onClickLauncherIcon() }
-        )
-
-        HorizontalDivider()
-
-        // Show each items in navigationItems
-        navigationItems.forEach { item ->
-            NavigationDrawerItem(
-                label = {
-                    Row {
-                        IconButton(onClick = {}) {
-                            Icon(
-                                painter = painterResource(id = item.drawableRes),
-                                contentDescription = stringResource(item.contentDescriptionStrRes)
-                            )
-                        }
-                        Text(
-                            modifier = Modifier.align(Alignment.CenterVertically),
-                            text = stringResource(id = item.labelStrRes)
-                        )
-                    }
-                },
-                selected = item.navItem.selected,
-                onClick = { onClickNavItem(item.navItem) }
-            )
-            HorizontalDivider()
-        }
-    }
-}
-
-@Composable
-fun ThreadListContent(
-    viewModel: ThreadsViewModel? = null,
-    onClickMenuOrUpIcon: () -> Unit
-) {
-    ThreadListContent(
-        viewModel?.title?.collectAsState(""),
-        viewModel?.isRefresh?.collectAsState(),
-        viewModel?.showProgress?.collectAsState(),
-        viewModel?.showUpIcon?.collectAsState(false),
-        viewModel?.showSearchTextField?.collectAsState(),
-        viewModel?.showErrorMessageForPermissionDenied?.collectAsState(),
-        viewModel?.lastMessageForEachThread?.collectAsState(),
-        viewModel?.onRefreshByUser,
-        viewModel?.onClickSearchIcon,
-        viewModel?.onSearchTextChanged,
-        viewModel?.onClickGrantPermission,
-        viewModel?.onClickThreadMessage,
-        onClickMenuOrUpIcon
-    )
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -312,11 +242,3 @@ private fun ThreadList(
         }
     )
 }
-
-
-
-val navigationItems = listOf(
-    NavItemAndroid.AccountNavItem,
-    NavItemAndroid.ContactNavItem
-)
-

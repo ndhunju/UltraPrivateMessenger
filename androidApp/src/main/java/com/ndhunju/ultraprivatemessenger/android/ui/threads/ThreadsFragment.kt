@@ -41,7 +41,7 @@ class ThreadsFragment: Fragment() {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        AppNavigationDrawer(viewModel)
+                        ThreadListContentWithNavDrawer(viewModel)
                     }
                 }
             }
