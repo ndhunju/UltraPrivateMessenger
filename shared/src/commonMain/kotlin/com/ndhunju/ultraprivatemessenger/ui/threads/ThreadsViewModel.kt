@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
@@ -90,7 +91,7 @@ class ThreadsViewModel(
 
     private var latestNewMessageTimeStamp: Long = Clock.System.now().toEpochMilliseconds()
 
-    private val newMessageObserver = FlowCollector<Long> { newMessageTimeStamp ->
+    private val newMessageObserver: (Long) -> Unit =  { newMessageTimeStamp ->
         viewModelScope.launch(Dispatchers.IO) {
             val newMessages = messageRepository.getMessagesSince(latestNewMessageTimeStamp)
             latestNewMessageTimeStamp = newMessageTimeStamp
@@ -110,8 +111,13 @@ class ThreadsViewModel(
 
     init {
         viewModelScope.launch {
-            appStateBroadcastService.newMessagesReceivedTime.collect(newMessageObserver)
-            appStateBroadcastService.newSyncedMessages.collect(newSyncedMessageObserver)
+            // NOTE: When you use collect fun, the control stops there until flow emits a value
+            // So you need to wrap each collect call inside launch or use onEach extension function
+            viewModelScope.launch {
+                appStateBroadcastService.newSyncedMessages.collect(newSyncedMessageObserver)
+            }
+            appStateBroadcastService.newMessagesReceivedTime.onEach(newMessageObserver)
+            updateLastMessagesWithCorrectSyncStatus()
         }
     }
 
@@ -202,8 +208,12 @@ class ThreadsViewModel(
     }
 
     private fun updateLastMessages(messages: List<Message>?) {
-        _lastMessageForEachThread.value.clear()
-        _lastMessageForEachThread.value.addAll(messages ?: emptyList())
+        // In order for collectors to be notified, me have to create a new mutable list
+        // This is not efficient but will do for now. In future, hopefully we can use
+        // mutableStateListOf() or SnapshotStateList when it because part of KMP
+        _lastMessageForEachThread.value = mutableListOf<Message>().apply {
+            addAll(messages ?: emptyList())
+        }
     }
 
 }

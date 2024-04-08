@@ -26,13 +26,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -56,16 +59,16 @@ import kotlinx.coroutines.launch
 @Preview
 @Composable
 fun ThreadScreenPreview() {
-    val dummyMessages = remember { MutableStateFlow(sampleMessages) }
+    val dummyMessages = remember { mutableStateListOf<Message>().apply { addAll(sampleMessages) } }
     ThreadListContent(
-        lastMessageList = dummyMessages.collectAsState(),
+        lastMessageList = dummyMessages,
         showErrorMessageForPermissionDenied = MutableStateFlow(false).collectAsState()
     )
 }
 
 @Composable
 fun ThreadListContentWithNavDrawer(
-    viewModel: ThreadsViewModel? = null
+    viewModel: ThreadsViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
     var onClickLauncherIconCount = remember { 0 }
@@ -73,29 +76,38 @@ fun ThreadListContentWithNavDrawer(
 
     AppNavigationDrawer(
         drawerState = drawerState,
-        onClickNavItem = viewModel?.onClickNavItem,
+        onClickNavItem = viewModel.onClickNavItem,
         onClickLauncherIcon = {
             onClickLauncherIconCount++
             if (onClickLauncherIconCount > 3) {
                 onClickLauncherIconCount = 0
-                viewModel?.doOpenDebugScreen?.invoke()
+                viewModel.doOpenDebugScreen?.invoke()
                 coroutineScope.launch { drawerState.close() }
             }
         }
     ) {
+        val messageSnapshotStateList = remember { mutableStateListOf<Message>() }
+        LaunchedEffect(key1 = "lastMessageForEachThread") {
+            messageSnapshotStateList.addAll(viewModel.lastMessageForEachThread.value)
+            viewModel.lastMessageForEachThread.collect {
+                messageSnapshotStateList.clear()
+                messageSnapshotStateList.addAll(it)
+            }
+        }
+
         ThreadListContent(
-            viewModel?.title?.collectAsState(""),
-            viewModel?.isRefresh?.collectAsState(),
-            viewModel?.showProgress?.collectAsState(),
-            viewModel?.showUpIcon?.collectAsState(false),
-            viewModel?.showSearchTextField?.collectAsState(),
-            viewModel?.showErrorMessageForPermissionDenied?.collectAsState(),
-            viewModel?.lastMessageForEachThread?.collectAsState(),
-            viewModel?.onRefreshByUser,
-            viewModel?.onClickSearchIcon,
-            viewModel?.onSearchTextChanged,
-            viewModel?.onClickGrantPermission,
-            viewModel?.onClickThreadMessage,
+            viewModel.title.collectAsState(""),
+            viewModel.isRefresh.collectAsState(),
+            viewModel.showProgress.collectAsState(),
+            viewModel.showUpIcon.collectAsState(false),
+            viewModel.showSearchTextField.collectAsState(),
+            viewModel.showErrorMessageForPermissionDenied.collectAsState(),
+            messageSnapshotStateList,
+            viewModel.onRefreshByUser,
+            viewModel.onClickSearchIcon,
+            viewModel.onSearchTextChanged,
+            viewModel.onClickGrantPermission,
+            viewModel.onClickThreadMessage,
             onClickMenuOrUpIcon = {
                 coroutineScope.launch {drawerState.open() }
             }
@@ -112,7 +124,7 @@ fun ThreadListContent(
     showUpIcon: State<Boolean>? = mutableStateOf(true),
     showSearchTextField: State<Boolean>? = null,
     showErrorMessageForPermissionDenied: State<Boolean>? = null,
-    lastMessageList: State<List<Message>>? = null,
+    lastMessageList: SnapshotStateList<Message>,
     onRefreshByUser: (() -> Unit)? = null,
     onClickSearchIcon: (() -> Unit)? = null,
     onSearchTextChanged: ((String) -> Unit)? = null,
@@ -216,7 +228,7 @@ fun ThreadListContent(
 private fun ThreadList(
     modifier: Modifier,
     lazyListState: LazyListState,
-    lastMessageList: State<List<Message>>?,
+    lastMessageList: SnapshotStateList<Message>?,
     onClickMessage: ((Message) -> Unit)?
 ) {
     LazyColumn(
@@ -229,7 +241,7 @@ private fun ThreadList(
         state = lazyListState,
         content = {
             itemsIndexed(
-                lastMessageList?.value ?: emptyList(),
+                items = lastMessageList?.toList() ?: emptyList(),
                 // Pass key for better performance like setHasStableIds
                 key = { _, item -> item.threadId },
             ) { _: Int, message: Message ->
