@@ -6,6 +6,8 @@
     <string name="image_description_search">Search</string>
     <!-- Image description for account icon -->
     <string name="image_description_account">Account</string>
+    <!-- Image description for contact icon -->
+    <string name="image_description_contact">Contact</string>
     <!-- Image description for an icon that indicates where the message has been synced or not  -->
     <string name="image_description_sync_status_logo">Message sync status</string>
     <!-- Image description for back icon. Clicking on this takes user to previous screen -->

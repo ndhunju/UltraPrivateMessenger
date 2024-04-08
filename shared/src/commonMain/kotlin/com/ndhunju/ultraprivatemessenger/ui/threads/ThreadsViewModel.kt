@@ -1,6 +1,7 @@
 package com.ndhunju.ultraprivatemessenger.ui.threads
 
 import com.ndhunju.ultraprivatemessenger.common.NavItem
+import com.ndhunju.ultraprivatemessenger.common.Result
 import com.ndhunju.ultraprivatemessenger.data.MessageRepository
 import com.ndhunju.ultraprivatemessenger.service.AppStateBroadcastService
 import kotlinx.coroutines.CoroutineScope
@@ -63,6 +64,7 @@ class ThreadsViewModel(
     val onSearchTextChanged: (String) -> Unit = {}
     val onClickAccountIcon = { doOpenAccountScreen?.invoke() }
     val onClickThreadMessage: (Message) -> Unit = { doOpenMessageFromScreen?.invoke(it) }
+    val onClickGrantPermission: () -> Unit = { doRequestPermission?.invoke() }
 
     val onClickNavItem: (NavItem) -> Unit = { navItem ->
         when (navItem) {
@@ -82,6 +84,7 @@ class ThreadsViewModel(
     var doOpenContacts: (() -> Unit)? = null
     var doOpenAccountScreen: (() -> Unit)? = null
     var doOpenDebugScreen: (() -> Unit)? = null
+    var doRequestPermission: (() -> Unit)? = null
 
     //endregion
 
