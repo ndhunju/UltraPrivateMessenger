@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">Ultra Private Messenger</string>
+
+    <!-- General Image Descriptions -->
+    <!-- Image description for search icon -->
+    <string name="image_description_search">Search</string>
+    <!-- Image description for account icon -->
+    <string name="image_description_account">Account</string>
+    <!-- Image description for an icon that indicates where the message has been synced or not  -->
+    <string name="image_description_sync_status_logo">Message sync status</string>
+    <!-- Image description for back icon. Clicking on this takes user to previous screen -->
+    <string name="image_description_go_back">Back</string>
+    <!-- Image description for user profile pic or an icon -->
+    <string name="image_description_user">User</string>
+    <!-- Image description for up button icon. Clicking on this scrolls to top of the list -->
+    <string name="image_description_scroll_to_top">Scroll To Top</string>
+
+    <!-- Shown to user inside a dialog or a text label when the app needs the permissions -->
+    <string name="permission_rationale">Grant the permissions so that the app can
+        function at its best.
+    </string>
+    <!-- Text shown in a button. When user clicks on it, app requests OS to grant permissions -->
+    <string name="grant_permissions">Grant Permissions</string>
+
+    <!-- Thread List Screen -->
+    <!-- Click label that describes what clicking on the particular item does. Used for accessibility -->
+    <string name="click_label_thread">Opens the thread to see all messages</string>
+
+    <!-- Navigation Item -->
+    <!-- Shown in side navigation drawer -->
+    <string name="nav_item_account">Account</string>
+    <!-- Shown in side navigation drawer -->
+    <string name="nav_item_contacts">Contacts</string>
+
+
+</resources>
