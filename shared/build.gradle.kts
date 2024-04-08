@@ -25,7 +25,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            //put your multiplatform dependencies here
+            // Put your multiplatform dependencies here
+            implementation(libs.kotlin.dateTime)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -37,7 +38,7 @@ android {
     namespace = "com.ndhunju.ultraprivatemessenger"
     compileSdk = 34
     defaultConfig {
-        minSdk = 24
+        minSdk = 26
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
