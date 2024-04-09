@@ -39,9 +39,9 @@ class MessageRepositoryImpl: MessageRepository {
         messages.forEach { message ->
             val previousLastMessage = threadToMessagesMap[message.threadId]
             if (previousLastMessage == null) {
-                threadToMessagesMap[message.threadId] = message //.copy(body = "changed $change")
+                threadToMessagesMap[message.threadId] = message //.copy(body = "changed $change", threadId = "threadId$change")
             } else if (previousLastMessage.date < message.date ) {
-                threadToMessagesMap[message.threadId] = message //.copy(body = "changed $change")
+                threadToMessagesMap[message.threadId] = message //.copy(body = "changed $change", threadId = "threadId$change")
             }
             change++
         }

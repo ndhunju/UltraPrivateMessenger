@@ -1,5 +1,6 @@
 package com.ndhunju.ultraprivatemessenger.ui.threads
 
+import com.ndhunju.ultraprivatemessenger.common.MutableStateListFlow
 import com.ndhunju.ultraprivatemessenger.common.NavItem
 import com.ndhunju.ultraprivatemessenger.common.Result
 import com.ndhunju.ultraprivatemessenger.data.MessageRepository
@@ -35,10 +36,9 @@ class ThreadsViewModel(
 
     val showUpIcon: Flow<Boolean> = MutableStateFlow(false)
 
-    private val _lastMessageForEachThread = MutableStateFlow<MutableList<Message>>(mutableListOf())
+    private val _lastMessageForEachThread = MutableStateListFlow<Message>()
     val lastMessageForEachThread = _lastMessageForEachThread.asStateFlow()
 
-    // Note: Compose doesn't track inner fields for changes unless we use mutableStateOf
     private val _showErrorMessageForPermissionDenied = MutableStateFlow(false)
     var showErrorMessageForPermissionDenied = _showErrorMessageForPermissionDenied.asStateFlow()
 
@@ -140,8 +140,8 @@ class ThreadsViewModel(
 
     private fun moveMessageToTopFrom(currentIndex: Int) {
         if (currentIndex != 0) {
-            val updatedThread = _lastMessageForEachThread.value.removeAt(currentIndex)
-            _lastMessageForEachThread.value.add(0, updatedThread)
+            val updatedThread = _lastMessageForEachThread.removeAt(currentIndex)
+            _lastMessageForEachThread.add(0, updatedThread)
         }
     }
 
@@ -164,7 +164,7 @@ class ThreadsViewModel(
      */
     private fun findIndexOfMessage(message: Message): Int {
         // Find the thread in which the message is sent to
-        _lastMessageForEachThread.value.forEachIndexed { index, lastMessage ->
+        _lastMessageForEachThread.forEachIndexed { index, lastMessage ->
             if (lastMessage.threadId == message.threadId) {
                 return index
             }
@@ -181,13 +181,13 @@ class ThreadsViewModel(
         date: Long? = null,
         syncStatus: Result<Nothing>? = null
     ) {
-        val exitingCopy = _lastMessageForEachThread.value[index]
-        _lastMessageForEachThread.value[index].copy(
+        val exitingCopy = _lastMessageForEachThread[index]
+        _lastMessageForEachThread[index].copy(
             body = body ?: exitingCopy.body,
             date = date ?: exitingCopy.date,
             syncStatus = syncStatus ?: exitingCopy.syncStatus
         ).let {
-            _lastMessageForEachThread.value[index] = it
+            _lastMessageForEachThread[index] = it
         }
     }
 
@@ -207,13 +207,8 @@ class ThreadsViewModel(
          }
     }
 
-    private fun updateLastMessages(messages: List<Message>?) {
-        // In order for collectors to be notified, me have to create a new mutable list
-        // This is not efficient but will do for now. In future, hopefully we can use
-        // mutableStateListOf() or SnapshotStateList when it because part of KMP
-        _lastMessageForEachThread.value = mutableListOf<Message>().apply {
-            addAll(messages ?: emptyList())
-        }
+    private fun updateLastMessages(messages: List<Message>) {
+        _lastMessageForEachThread.addAll(messages)
     }
 
 }
