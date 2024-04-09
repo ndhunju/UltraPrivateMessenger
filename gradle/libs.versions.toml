@@ -2,9 +2,8 @@
 agp = "8.3.1"
 composeBom = "2024.04.00"
 kotlin = "1.9.22"
-compose = "1.6.5"
+# This is being used in androidApp/build.gradle.kts:20:56
 compose-compiler = "1.5.8"
-compose-material3 = "1.2.1"
 androidx-activityCompose = "1.8.2"
 lifecycleRuntimeKtx = "2.7.0"
 
