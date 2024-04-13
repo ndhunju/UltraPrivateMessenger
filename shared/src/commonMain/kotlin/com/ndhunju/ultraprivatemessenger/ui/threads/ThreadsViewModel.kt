@@ -208,7 +208,7 @@ class ThreadsViewModel(
     }
 
     private fun updateLastMessages(messages: List<Message>) {
-        _lastMessageForEachThread.replaceAll(messages)
+        _lastMessageForEachThread.setDataSet(messages)
     }
 
 }
