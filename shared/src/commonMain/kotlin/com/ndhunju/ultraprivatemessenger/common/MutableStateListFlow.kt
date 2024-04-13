@@ -44,6 +44,16 @@ class MutableStateListFlow<T>(
         return previous
     }
 
+    override fun clear() {
+        mutableList.clear()
+        triggerNotification()
+    }
+
+    fun replaceAll(elements: Collection<T>): Boolean {
+        mutableList.clear()
+        return addAll(elements)
+    }
+
     fun getIndex(element: T): Int? {
         mutableList.forEachIndexed{ i, item ->
             if (item == element) {

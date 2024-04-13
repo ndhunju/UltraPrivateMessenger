@@ -49,6 +49,7 @@ import com.ndhunju.ultraprivatemessenger.android.R
 import com.ndhunju.ultraprivatemessenger.android.ui.common.CenteredMessageWithButton
 import com.ndhunju.ultraprivatemessenger.android.ui.common.NavAppBar
 import com.ndhunju.ultraprivatemessenger.android.ui.common.ScrollToTopLaunchedEffect
+import com.ndhunju.ultraprivatemessenger.android.ui.common.asSnapshotStateList
 import com.ndhunju.ultraprivatemessenger.android.ui.navigation.AppNavigationDrawer
 import com.ndhunju.ultraprivatemessenger.data.sampleMessages
 import com.ndhunju.ultraprivatemessenger.ui.threads.Message
@@ -86,15 +87,6 @@ fun ThreadListContentWithNavDrawer(
             }
         }
     ) {
-        val messageSnapshotStateList = remember { mutableStateListOf<Message>() }
-        LaunchedEffect(key1 = "lastMessageForEachThread") {
-            messageSnapshotStateList.addAll(viewModel.lastMessageForEachThread.value)
-            viewModel.lastMessageForEachThread.collect {
-                messageSnapshotStateList.clear()
-                messageSnapshotStateList.addAll(it)
-            }
-        }
-
         ThreadListContent(
             viewModel.title.collectAsState(""),
             viewModel.isRefresh.collectAsState(),
@@ -102,7 +94,7 @@ fun ThreadListContentWithNavDrawer(
             viewModel.showUpIcon.collectAsState(false),
             viewModel.showSearchTextField.collectAsState(),
             viewModel.showErrorMessageForPermissionDenied.collectAsState(),
-            messageSnapshotStateList,
+            viewModel.lastMessageForEachThread.asSnapshotStateList(),
             viewModel.onRefreshByUser,
             viewModel.onClickSearchIcon,
             viewModel.onSearchTextChanged,
