@@ -30,6 +30,7 @@ androidx-fragment = { module = "androidx.fragment:fragment-ktx", version = "1.6.
 
 #Kotlin
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test"}
 kotlin-dateTime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version = "0.3.3" }
 kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.8.0" }
 

@@ -111,11 +111,11 @@ class MutableStateListFlow<T>(
 
     sealed class Operation<T> {
         class None<T>: Operation<T>()
-        class AddAll<T>(val items: Collection<T>): Operation<T>()
+        class Clear<T> : Operation<T>()
         class RemoveAt<T>(val index: Int): Operation<T>()
+        class AddAll<T>(val items: Collection<T>): Operation<T>()
         class Add<T>(val index: Int, val item: T): Operation<T>()
         class Set<T>(val index: Int, val item: T): Operation<T>()
-        class Clear<T> : Operation<T>()
         class DataSetChanged<T>(val items: Collection<T>): Operation<T>()
     }
 
